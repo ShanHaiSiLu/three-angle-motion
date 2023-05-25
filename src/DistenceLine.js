@@ -16,7 +16,7 @@ import {
 } from "three";
 import { CSS2DObject } from "three/examples/jsm/renderers/CSS2DRenderer";
 
-export class LengthLabel {
+class LengthLabel {
   constructor(position = new Vector3(0, 0, 0), text = "") {
     this.dom = document.createElement("div");
     this.dom.className = "length-label";
@@ -82,10 +82,7 @@ export class DistenceLine {
   // 标准球geometry
   standerSphereGeometry = new SphereGeometry(0.1);
   // 测距线上的球mesh的原型
-  dottingdSphere = new Mesh(
-    this.standerSphereGeometry,
-    new MeshStandardMaterial({ color: 0xff0000 }),
-  );
+  dottingdSphere = new Mesh(this.standerSphereGeometry, new MeshStandardMaterial({ color: 0xff0000 }));
 
   /** @测距线相关变量 */
   dottingPositions = []; // 打点的位置
@@ -103,7 +100,8 @@ export class DistenceLine {
   clonedMesh; /**@不会被清理的变量 */
 
   /** @预选区相关变量 */
-  readySphere = new Mesh(this.standerSphereGeometry, new MeshStandardMaterial()); // 预选区的球mesh
+  readySphereMaterial = new MeshStandardMaterial();
+  readySphere = new Mesh(this.standerSphereGeometry, this.readySphereMaterial); // 预选区的球mesh
   readyPath = new LineCurve3();
   readyTubeMaterial = new MeshStandardMaterial({
     transparent: true,
@@ -113,7 +111,18 @@ export class DistenceLine {
   readyTubeMesh;
   readyLabel = new LengthLabel();
 
-  constructor(plottingScale = 1, unit = "米") {
+  constructor(plottingScale = 1, unit = "米", option = {}) {
+    // 默认值赋值
+    this.distenceTubeMaterial = option.distenceTubeMaterial || this.distenceTubeMaterial;
+
+    this.standerSphereGeometry = option.standerSphereGeometry || this.standerSphereGeometry;
+    this.dottingdSphere = option.dottingdSphere || this.dottingdSphere;
+
+    this.closedMaterial = option.closedMaterial || this.closedMaterial;
+
+    this.readySphereMaterial = option.readySphereMaterial || this.readySphereMaterial;
+    this.readyTubeMaterial = option.readyTubeMaterial || this.readyTubeMaterial;
+
     // 比例尺
     this.plottingScale = plottingScale;
     // 单位
@@ -164,18 +173,14 @@ export class DistenceLine {
     this.distencePath.add(_path);
 
     // 生成对应管道
-    this.distenceGeometry = new TubeGeometry(
-      this.distencePath,
-      this.dottingPositions.length * 50,
-      0.06,
-    );
+    this.distenceGeometry = new TubeGeometry(this.distencePath, this.dottingPositions.length * 50, 0.06);
     this.distenceTubeMesh = new Mesh(this.distenceGeometry, this.distenceTubeMaterial);
     this.meshs.add(this.distenceTubeMesh);
 
     // 增加标签
     let texLabel = new LengthLabel(
       _path.v1.clone().lerp(_path.v2, 0.5),
-      (_path.v1.distanceTo(_path.v2) * this.plottingScale).toFixed(2) + this.unit,
+      (_path.v1.distanceTo(_path.v2) * this.plottingScale).toFixed(2) + this.unit
     );
     this.meshs.add(texLabel.label);
     this.dottingLabels.push(texLabel);
@@ -198,7 +203,7 @@ export class DistenceLine {
     // 更新预备标签
     this.readyLabel.copyPosition(this.readyPath.v1.clone().lerp(this.readyPath.v2, 0.5));
     this.readyLabel.setText(
-      (this.readyPath.v1.distanceTo(this.readyPath.v2) * this.plottingScale).toFixed(2) + this.unit,
+      (this.readyPath.v1.distanceTo(this.readyPath.v2) * this.plottingScale).toFixed(2) + this.unit
     );
 
     // 清空之前的形状和物体
@@ -243,10 +248,8 @@ export class DistenceLine {
     let texLabel = new LengthLabel(
       this.closedPath.v1.clone().lerp(this.closedPath.v2, 0.5),
       `总长度 ${allLength.toFixed(2)}${this.unit} <br />
-       直线距离 ${(this.closedPath.v1.distanceTo(this.closedPath.v2) * this.plottingScale).toFixed(
-         2,
-       )} ${this.unit}
-    `,
+       直线距离 ${(this.closedPath.v1.distanceTo(this.closedPath.v2) * this.plottingScale).toFixed(2)} ${this.unit}
+    `
     );
     this.meshs.add(texLabel.label);
     this.dottingLabels.push(texLabel);
@@ -299,7 +302,7 @@ export class DistenceLine {
     // 清空测距线的tube和sphere
     this.meshs.remove(this.distenceTubeMesh);
     this.distenceTubeMesh?.removeFromParent();
-    this.dottingLineSphereMesh.children.forEach(sphere => {
+    this.dottingLineSphereMesh.children.forEach((sphere) => {
       this.dottingLineSphereMesh.remove(sphere);
       sphere?.removeFromParent();
     });
@@ -310,7 +313,7 @@ export class DistenceLine {
     this.meshs?.removeFromParent();
 
     // 清空文本标签
-    this.dottingLabels.forEach(lable => {
+    this.dottingLabels.forEach((lable) => {
       lable.destroy();
     });
 
@@ -320,7 +323,7 @@ export class DistenceLine {
   }
 }
 
-export class AreaLine extends DistenceLine {
+class AreaLine extends DistenceLine {
   constructor() {
     super();
 
@@ -359,7 +362,7 @@ export class AreaLine extends DistenceLine {
 
     let planeFigure = new Mesh(
       new ShapeGeometry(this.shape),
-      new MeshStandardMaterial({ color: 0xffff00, side: DoubleSide }),
+      new MeshStandardMaterial({ color: 0xffff00, side: DoubleSide })
     );
 
     planeFigure.rotateX(-Math.PI / 2);

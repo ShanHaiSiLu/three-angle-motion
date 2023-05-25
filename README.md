@@ -1,6 +1,6 @@
 # 提供了几个构建 threejs 项目时可能会很有用的有意思的类
 
-## 贝塞尔折线（圆角折线）
+## 贝塞尔折线（圆角折线）：`BezierPolyline3D`
 
 &ensp;&ensp;&ensp;&ensp;用来创建一个**圆角曲线**。
 
@@ -96,7 +96,7 @@ let btnPoints = new MiniAngleCurvePath(points, r);
 
   在尾部弹出一个点。
 
-## 指针锁定轨道控制器
+## 指针锁定轨道控制器：`PointerLockOrbitControls`
 
 > 暂时仅支持透视相机
 
@@ -153,4 +153,8 @@ let btnPoints = new MiniAngleCurvePath(points, r);
 
   获取水平夹角
 
-## 打点测距
+## 打点测距：`DistenceLine`
+
+一个方便的、便捷的打点测距功能，只要设置好比例尺就能很方便地使用！
+
+需要注意的是，如果一条测距线已经不再被需要了，那么需要手动调用实例对象的`destroy`方法来销毁`mesh`、`geometry`、`material`等

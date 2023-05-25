@@ -51,14 +51,18 @@ export class PointerLockOrbitControls extends EventDispatcher {
   constructor(object, domElement, target) {
     super();
 
-    if (!object) {
-      console.error("指针锁定轨道控制器的参数一异常！");
+    if (!object?.isPerspectiveCamera) {
+      return console.error(
+        "指针锁定轨道控制器创建失败：构造函数的参数一不是透视相机（PerspectiveCamera）！",
+      );
     }
-    if (!domElement) {
-      console.error("指针锁定轨道控制器的参数二异常！");
+    if (!domElement instanceof HTMLElement || domElement.tagName !== "CANVAS") {
+      return console.error(
+        "指针锁定轨道控制器创建失败：构造函数的参数二不是一个合法的canvas元素！",
+      );
     }
-    if (!target) {
-      console.error("指针锁定轨道控制器的参数三异常！");
+    if (!target?.isVector3) {
+      return console.error("指针锁定轨道控制器创建失败：构造函数的参数三不是三维向量（Vector3）！");
     }
 
     this.object = object;
